@@ -4,6 +4,36 @@
 # Determines the Capacity Dimension of a 2D trajectory of a dynamical system.
 
 ##
+using LinearAlgebra
+using SparseArrays
+
+function dcap(t::Tuple{Vector{Float64},Vector{Float64}}, ϵ::Float64)::Tuple{Vector{Int64},Vector{Int64}}
+    x, z = t
+    xmin = minimum(x)
+    zmin = minimum(z)
+
+    x_to_ind(x) = ceil(Int64, (x - xmin) / ϵ)
+    z_to_ind(z) = ceil(Int64, (z - zmin) / ϵ)
+
+    return (x_to_ind.(x), z_to_ind.(z))
+end
+
+
+function N(t::Tuple{Vector{Float64},Vector{Float64}}, ϵ::Float64)
+    x, z = dcap(t, ϵ)
+    w = spzeros(Float64, length(x), length(z))
+
+    for (i, j) in (zip(x, z))
+        if (i != 0 && j != 0)
+            w[i, j] = 1
+        end
+    end
+
+    return sum(w)
+end
+##
+
+##
 using CairoMakie
 using DataFrames
 using DelimitedFiles
